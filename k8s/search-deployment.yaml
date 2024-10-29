@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: search
+  template:
+    metadata:
+      labels:
+        app: search
+    spec:
+      containers:
+      - name: search-container
+        image:  us-central1-docker.pkg.dev/codetokloud/search/search:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: AUTH_SERVICE_URL
+          value: "http://auth-service:8000"
+        - name: SEARCH_API_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: search-config
+              key: SEARCH_API_KEY
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: search-config
+data:
+  SEARCH_API_KEY: "searchapikey123"
